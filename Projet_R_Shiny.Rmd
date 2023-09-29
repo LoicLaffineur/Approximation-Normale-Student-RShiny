@@ -1,0 +1,168 @@
+---
+title: "Approximation de la loi Normale centrée réduite par la loi de Student"
+runtime: shiny
+output: html_document
+---
+
+##Introduction au projet :
+
+Dans ce projet, nous allons essayer d'illustrer et de prouver l'approximation de la loi Normale centrée réduite par une loi de Student.
+
+$$\mathcal{St}(d) \xrightarrow[d\rightarrow +\infty]{\mathcal L} \mathcal N(0,1)$$
+
+Nous commencerons par illustrer cette convergence en visualisant des densités de student à degré de liberté (ddl) croissants, puis nous verrons ce qu'est la loi de Student et nous prouverons sa convergence vers une loi normale et enfin nous comparerons brièvement les quantités caractéristiques de ces lois entre elles.
+
+##Intuition graphique:
+
+Tout d'abord, commençons par voir, graphiquement, si cette hypothèse est censée. Pour cela, commençons par tracer les densités de la $\mathcal N(0,1)$ ainsi que celle de plusieurs lois de student avec des degrés de liberté croissants (ici 0.5, 1, 5 et 10).
+
+```{r, echo=FALSE,fig.width=15,fig.align='center'}
+par(mfrow=c(1,2))
+curve(dnorm(x,0,1),xlim=c(-5,5),main="Comparaison de la loi de Student à la loi Normale",col="red",lwd=2,ylab="Densité")
+curve(dt(x,0.5),add=TRUE,col="blue")
+curve(dt(x,1),add=TRUE,col="green")
+curve(dt(x,5),add=TRUE,col="black")
+curve(dt(x,10),add=TRUE,col="purple")
+legend("topright", legend = c("N(0,1)", "St(0.5)","St(1)","St(5)","St(10)"),
+       col=c("red","blue","green","black","purple"),lwd=1)
+
+hist(rt(1000,100),breaks=50, xlim=c(-5,5), probability=TRUE,main="Histogramme d'une Student à 100 ddl",ylab="Densité",xlab='x')
+curve(dnorm(x,0,1),add=TRUE,col='red',lwd=2)
+
+par(mfrow=c(1,1))
+```
+
+On peut observer que, lorsque le nombre de degré de liberté d'une loi de Student augmente, sa densité à tendance à s'aplatir au niveau des queues et se recentrer autour de 0 et ainsi se rapprocher de la densité de la $\mathcal N(0,1)$. On peut aussi voir sur l'histogramme qu'une Student à 10 degrés de liberté s'approche déjà beaucoup de ce qu'on pourrait voir avec une loi Normale. 
+
+##Loi de Student :
+
+Maintenant que nous avons vu que cette hypothèse est cohérente avec la réalité observée, prouvons qu'il y a bel et bien convergence de la Student vers la Normale. Tout d'abord, qu'est-ce que la loi de Student ?
+
+La loi de Student (à d degré de liberté) peut être définie comme le quotient entre une variable aléatoire de loi Normale centrée réduite et la racine carrée d'une variable aléatoire du $\chi²$ divisée par son nombre de degré de liberté (avec indépendance entre ces deux variables aléatoires !) : 
+
+$$\frac {\mathcal N(0,1)}{\sqrt{\frac {\chi²(d)}{d}}} $$
+
+C'est une loi continue, à densité, telle que $ X \sim \mathcal{St(d)} $ a pour densité la fonction définie sur $\mathbb{R}$ : 
+
+$$ f_X(x) =  \frac{1}{\sqrt{k\pi}} \frac{\Gamma( \frac{k+1}{2})} {\Gamma(\frac{k}{2})} (1+ \frac{x²}{k})^{-\frac{k+1}{2}} 
+\text{,  pour }k>0\text{  et  } 
+\Gamma(z) = \int_0^{+\infty}t^{z-1}e^{-t}dt \text{,    } \forall z\in \mathbb{C}$$
+
+La loi de Student est une loi importante car elle apparait pour construire des tests statistiques, des intervalles de confiance et plus généralement statistiques bayésiennes.
+Elle apparait notamment lors de la construction d'intervalle de confiance pour la moyenne d'une loi $\mathcal N(\mu,\sigma²)$ avec $\mu$ et $\sigma²$ inconnus.
+
+On peut prouver mathématiquement la convergence de la fonction de densité de la loi de Student vers celle de la loi normale en montrant que : 
+
+$\bullet$ $\frac{1}{\sqrt{k\pi}} \frac{\Gamma( \frac{k+1}{2})} {\Gamma(\frac{k}{2})} \xrightarrow[k\rightarrow +\infty]{} \frac{1}{\sqrt{2\pi}}$
+en utilisant que : $\lim_{x \to +\infty} \frac{\Gamma(t+\alpha)}{\Gamma(t)t^\alpha} = 1$
+
+
+$\bullet$ $(1+ \frac{x²}{k})^{-\frac{k+1}{2}}\xrightarrow[k\rightarrow +\infty]{} e^{\frac{-x²}{2}}$
+en sachant que : $\lim_{k \to +\infty} (1+\frac{t}{k})^k=e^t$
+
+A l'aide de ces deux résultats d'un changement de variable : $t=\frac{k}{2}$ on obtient la densité d'une loi de student vers la densité d'une $\mathcal N(0,1)$. A l'aide du Lemme de Scheffé :
+
+Soit $(f_n)_{n\geq0}$ une suite de densités de probabilité définies sur le même ensemble $E$ et par rapport a la même mesure $\mu$ sur l'espace mesurable $(E,\mathcal{E})$. Supposons que $(f_n)_{n\geq0}$ converge  $\mu$-presque partout vers une densité de probabilité $f$ et que la suite des moyennes des fonctions $(f_n)_{n\geq0}$ converge vers la moyenne de la fonction $f$.
+
+Alors : 
+$1)$ $(f_n)_{n\geq0}$ converge vers $f$ dans $L_1$.
+
+$2)$ Si les variables aléatoires $X_n$ et $X$ ont pour densités respectives $(f_n)_{n\geq0}$ et $f$, $X_n$ converge en loi vers $X$.
+
+Ainsi, comme la moyenne d'une loi de student tend vers 0 lorsque ses degrés de liberté tendent vers l'infini on a bien la convergence en loi de la loi de Student vers la $\mathcal N(0,1)$.
+
+##Comparaison des quantités caractéristiques des lois :
+
+Pour finir, on peut voir la différence entre certaines quantité caractéristique d'une $\mathcal{N}(0,1)$ et celle d'une $\mathcal{St}(d)$ avec $d= 1, 5, 10 ,50 ,100$ :
+
+```{r,echo=FALSE,warning=FALSE}
+# install.packages("moments")
+library(moments)
+B=1000
+result=matrix(NA,nrow=6,ncol=4)
+colnames(result)=c("Mean","Variance","Skewness","Kurtosis")
+row.names(result)=c("St(1)","St(5)","St(10)","St(50)","St(100)","N(0,1)")
+result[6,]=c(0,1,0,0)
+ddl=c(1,5,10,50,100)
+
+for(j in 1:5){
+  moy=rep(0,B)
+  var=rep(0,B)
+  kurt=rep(0,B)
+  asym=rep(0,B)
+  for( i in 1:B){
+    obs=rt(1000,ddl[j])
+    moy[i]=mean(obs)
+    var[i]=var(obs)
+    asym[i]=skewness(obs)
+    kurt[i]=kurtosis(obs)
+  }
+  result[j,1]=mean(moy)
+  result[j,2]=mean(var)
+  result[j,3]=mean(asym)
+  result[j,4]=mean(kurt)-3
+}
+print(result)
+```
+
+On observe une nouvelle fois avec ces résultats ce qu'on pouvait voir graphiquement avec les densités : la moyenne, le coefficient d'asymétrie et le kurtosis se rapprochent de 0, la variance diminue et tend vers 1 comme on pourrait observer dans sur une $\mathcal N(0,1)$. 
+
+On pourrait aussi comparer les quantiles de ces deux lois à l'aide d'un Q-Q plot :
+
+```{r,echo=FALSE,fig.width=10,fig.align='center'}
+obs100=rt(1000,100)
+obs10=rt(1000,10)
+obs5=rt(1000,5)
+
+par(mfrow=c(1,3))
+qqnorm(obs5,main="Q-Q Plot avec une St(5)")
+abline(0,1,col='red')
+qqnorm(obs10,main="Q-Q Plot avec une St(10)")
+abline(0,1,col='red')
+qqnorm(obs100,main="Q-Q Plot avec une St(100)")
+abline(0,1,col='red')
+par(mfrow=c(1,1))
+
+```
+
+On remarque qu'en faisant croitre le nombre de degré de liberté, le Q-Q plot s'aligne de mieux en mieux sur la première bissectrice, l'approximation est donc de mieux en mieux en augmentant les degrés de liberté.
+
+Pour finir, on pourrait faire un test de normalité et regarder sa p-value. Par exemple le test de Shapiro-Wilks : 
+
+```{r,echo=FALSE,warning=FALSE}
+nb_rep=3000
+result=matrix(NA,nrow=1,ncol=5)
+colnames(result)=c("St(1)","St(5)","St(10)","St(50)","St(100)")
+row.names(result)=c("p-value")
+ddl=c(1,5,10,50,100)
+for(j in 1:5){
+  obs=rt(nb_rep,ddl[j])
+  result[1,j]=shapiro.test(obs)$p.value
+}
+print(result)
+```
+
+On peut observer que la p-value (plus petit seuil à partir duquel on rejette l'hypothèse que notre loi est gaussienne) augmente avec les ddl pour atteindre au moins 0.5 : on ne rejette donc pas l'hypothèse. Ce test nous justifie une nouvelle fois que l'approximation de la loi Normale centrée réduite par une loi de Student est une bonne approximation lorsque le degré de liberté de la loi de Student est élevé.
+
+##Pour le coté intéractif :
+
+```{r curve, echo=FALSE,fig.width=5}
+inputPanel(
+  sliderInput("ddl",
+                  "Nombre de degré de liberté (ddl):",
+                  min = 0.1,
+                  max = 20,
+                  value = 1)
+)
+renderPlot({
+    curve(dt(x,input$ddl),col='blue',xlim=c(-4,4),ylim=c(0,0.6),
+          main="Comparaison de la densité d'une Student(ddl) à la normale",ylab="Densité")
+    curve(dnorm(x,0,1),col='red',add=TRUE)
+    legend(x='topright',legend = c("St(ddl)", "N(0,1)"),col=c('blue','red'),lwd=1)
+  })
+renderPlot({
+  obs=rt(1000,input$ddl)
+  qqnorm(obs,main="Comparaison des quantiles d'une Student(ddl) à la normale",xlim=c(-4,4),ylim=c(-4,4))
+  abline(0,1,col='red')
+  })
+```
